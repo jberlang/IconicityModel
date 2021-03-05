@@ -36,9 +36,10 @@ def sign_acquisition(agent):
             # choose random word
             random_semantic_component = random.choice(semantic_components)
             phonological_component = select_most_iconic_occurrence(random_semantic_component, interlocutors)
+            learned_phonological_component = learn_phonological_component(agent, phonological_component)
 
             # add word with the most iconic phonological component - if same for every interlocutor, then take mode
-            agent.add_word(random_semantic_component, phonological_component)
+            agent.add_word(random_semantic_component, learned_phonological_component)
 
 
 def select_highest_occurrence(semantic_component, neighbours):
@@ -119,3 +120,19 @@ def get_mode(phonological_components, interlocutors):
 
     # return the phonological component that has the highest counter
     return max(counters, key=counters.get)
+
+
+def learn_phonological_component(agent, phonological_component):
+    phonological_bits = [bit for bit in phonological_component]
+    length = len(phonological_bits)
+    # random bits that will be flipped
+    idxs = random.sample(range(0, length), agent.learning_error)
+
+    for idx in idxs:
+        # select bit
+        old_bit = int(phonological_bits[idx])
+        # flip the bit
+        new_bit = 1 - old_bit
+        phonological_bits[idx] = str(new_bit)
+
+    return ''.join(phonological_bits)

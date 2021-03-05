@@ -33,7 +33,6 @@ class IconicityModel(Model):
         self.schedule = RandomActivation(self)
 
         # ranges of agent properties
-        self.age_range = [0, 1]
         self.aoa_range = ["L1", "L2"]
 
         # create agents
@@ -89,9 +88,12 @@ class IconicityModel(Model):
 
                 # generates new random properties
                 new_aoa = random.choice(self.aoa_range)
-                new_age = random.choice(self.age_range)
 
-                # a L2 agent can never have
+                # an agent that replaces another can never be L1 and age 1
+                if new_aoa == "L1":
+                    new_age = 0
+
+                # a L2 agent can never have age 0
                 if new_aoa == "L2":
                     new_age = 1
 
@@ -108,12 +110,7 @@ class IconicityModel(Model):
 
 
 # # Data collection
-# 
 # This section contains functions that allows us to collect data from both the model and the agents.
-
-# In[3]:
-
-
 def compute_average_iconicity(model):
     agent_iconicity_ratios = [agent.iconicity_ratio() for agent in model.schedule.agents]
     number_of_agents = len(agent_iconicity_ratios)

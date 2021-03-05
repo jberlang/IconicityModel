@@ -40,15 +40,14 @@ class SignerAgent(Agent):
         return neighbours
 
     def generate_iconic_vocabulary(self):
-        """Creates a vocabulary for the agent"""
+        """Creates a vocabulary for the agent - empty if the agent is a child"""
         vocab = dict()
-
-        while len(vocab) < self.vocab_size:
-            semantic_component = self.create_random_semantic_component()
-            if semantic_component not in vocab:
-                phonological_component = self.create_phonological_component(semantic_component)
-                vocab[semantic_component] = phonological_component
-
+        if self.age > 0:
+            while len(vocab) < self.vocab_size:
+                semantic_component = self.create_random_semantic_component()
+                if semantic_component not in vocab:
+                    phonological_component = self.create_phonological_component(semantic_component)
+                    vocab[semantic_component] = phonological_component
         return vocab
 
     def create_random_semantic_component(self):
@@ -63,7 +62,7 @@ class SignerAgent(Agent):
 
     def create_phonological_component(self, word):
         """Create a phonological component, changing a few bits - amount of bits is stored in initial_error"""
-        semantic_component = [char for char in word]
+        semantic_component = [bit for bit in word]
         length = len(semantic_component)
         # random bits that will be flipped
         idxs = random.sample(range(0, length), self.initial_error)
@@ -80,18 +79,24 @@ class SignerAgent(Agent):
     def iconicity_ratio(self):
         """Calculates the average iconicity for an agent's vocabulary"""
         ratios = []
+        vocab = self.vocabulary
+        vocab_size = self.get_vocab_size()
 
-        for key, value in self.vocabulary.items():
-            matched_bits = 0
-            semantic_component = [char for char in key]
-            phonological_component = [char for char in value]
+        if vocab_size > 0:  # if dictionary is empty
+            for key, value in vocab.items():
+                matched_bits = 0
+                semantic_component = [bit for bit in key]
+                phonological_component = [bit for bit in value]
 
-            for idx in range(self.word_length):
-                if semantic_component[idx] == phonological_component[idx]:
-                    matched_bits += 1
-            ratios.append(matched_bits / self.word_length)
+                for idx in range(self.word_length):
+                    if semantic_component[idx] == phonological_component[idx]:
+                        matched_bits += 1
+                ratios.append(matched_bits / self.word_length)
 
-        return sum(ratios) / self.get_vocab_size()
+        if vocab_size > 0:
+            return sum(ratios) / self.get_vocab_size()
+        else:
+            return 1
 
     def step(self):
         """Advance the agent by one step - PH - STILL TO BE IMPLEMENTED"""
