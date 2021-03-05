@@ -103,5 +103,5 @@ class SignerAgent(Agent):
         # choose random agent
         # other_agent = self.random.choice(self.model.schedule.agents)
         # PH - placeholder: choose random neighbour
-        #sign_acquisition(self)
+        sign_acquisition(self)
         self.age_up()
