@@ -6,9 +6,9 @@ def sign_acquisition(agent):
 
     # depending on the properties of the acquiring agent, it will acquire the word differently
     if agent.aoa == "L1":  # if agent is an L1 signer
-        if agent.age == 0:
+        if agent.age >= 0:
             # neighbours are fetched of the agent that needs to acquire a word
-            neighbours = list(filter(lambda a: a.age == 1 and a.get_vocab_size() > 0,
+            neighbours = list(filter(lambda a: a.age > 0 and a.get_vocab_size() > 0,
                                      agent.get_neighbours()))  # filter children + empty vocabs out
 
             if len(neighbours) > 0:
@@ -28,9 +28,9 @@ def sign_acquisition(agent):
 
     # depending on the properties of the acquiring agent, it will acquire the word differently
     if agent.aoa == "L2":  # if agent is an L2 signer
-        if agent.age == 1:
+        if agent.age > 0:
             # get random agents from across the grid
-            interlocutors = list(filter(lambda a: a.age == 1 and a.get_vocab_size() > 0,
+            interlocutors = list(filter(lambda a: a.age > 0 and a.get_vocab_size() > 0,
                                         agent.model.random_agents(8)))  # filter children + empty vocabs out
 
             if len(interlocutors) > 0:

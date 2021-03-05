@@ -9,15 +9,21 @@ import random
 class IconicityModel(Model):
     """A model with its width, height, vocabulary and word size"""
 
-    def __init__(self, width, height, vocab_size, word_length, initial_degree_of_iconicity, learning_error):
+    def __init__(self, width, height, vocab_size, word_length, turnover_chance, turnover_threshold,
+                 initial_degree_of_iconicity, learning_error_degree):
         super().__init__()
         # parameters
         self.width = width
         self.height = height
         self.vocab_size = vocab_size
         self.word_length = word_length
-        self.initial_error = int(word_length - (round((initial_degree_of_iconicity * word_length) * 10) / 10))
-        self.learning_error = learning_error
+        # chance of an adult agent to die and be replaced
+        self.turnover_chance = turnover_chance / 100
+        self.turnover_threshold = turnover_threshold
+        # initial phonological error in dictionaries of children
+        self.initial_error = word_length - round((initial_degree_of_iconicity / 100) * word_length)
+        # error of adults when acquiring a new phonological component
+        self.learning_error = round((learning_error_degree / 100) * word_length)
 
         # batch runner running status
         self.running = True
@@ -82,12 +88,16 @@ class IconicityModel(Model):
     def replace_agents(self):
         """Clear any dead agents from the model and add new ones"""
         for a in self.schedule.agents:
-            if a.age >= 2:
+            # generate a random number between 0 and 1 to be compared with turnover_chance later
+            dying_chance = random.uniform(0, 1)
+            # agents have a possibility of dying when age > 2, but are guaranteed to die over turnover_threshold
+            if (a.age >= 2 and dying_chance <= self.turnover_chance) or a.age > self.turnover_threshold:
                 # get position of agent that is to be replaced
                 x, y = a.pos
 
                 # generates new random properties
                 new_aoa = random.choice(self.aoa_range)
+                new_age = 0
 
                 # an agent that replaces another can never be L1 and age 1
                 if new_aoa == "L1":

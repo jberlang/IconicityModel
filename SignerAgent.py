@@ -96,7 +96,7 @@ class SignerAgent(Agent):
         if vocab_size > 0:
             return sum(ratios) / self.get_vocab_size()
         else:
-            return 1
+            return 0
 
     def step(self):
         """Advance the agent by one step - PH - STILL TO BE IMPLEMENTED"""
