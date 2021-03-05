@@ -3,6 +3,7 @@ from mesa.time import RandomActivation
 from mesa.space import SingleGrid  # at most one agent per cell
 from mesa.datacollection import DataCollector
 from SignerAgent import *
+from DataCollection import *
 import random
 
 
@@ -52,7 +53,9 @@ class IconicityModel(Model):
 
         # data collection
         self.datacollector = DataCollector(
-            model_reporters={"Iconicity": compute_average_iconicity})
+            model_reporters={"Total avg. iconicity": compute_total_average_iconicity,
+                             "L1 avg. iconicity": compute_l1_average_iconicity,
+                             "L2 avg. iconicity": compute_l2_average_iconicity})
 
     def random_agents(self, amount):
         """Returns a list of random agents on the grid"""
@@ -102,26 +105,17 @@ class IconicityModel(Model):
                 # an agent that replaces another can never be L1 and age 1
                 if new_aoa == "L1":
                     new_age = 0
-
                 # a L2 agent can never have age 0
                 if new_aoa == "L2":
                     new_age = 1
 
                 # remove the old agent
                 self.remove_agent(a)
-
                 # create a new agent and place it at the old agent's location
                 self.create_agent(x, y, new_age, new_aoa)
 
     def step(self):
         """Advance the model by one step"""
+        self.datacollector.collect(self)
         self.schedule.step()
         self.replace_agents()
-
-
-# # Data collection
-# This section contains functions that allows us to collect data from both the model and the agents.
-def compute_average_iconicity(model):
-    agent_iconicity_ratios = [agent.iconicity_ratio() for agent in model.schedule.agents]
-    number_of_agents = len(agent_iconicity_ratios)
-    return sum(agent_iconicity_ratios) / number_of_agents
