@@ -18,6 +18,7 @@ class IconicityModel(Model):
         self.height = height
         self.vocab_size = vocab_size
         self.word_length = word_length
+        self.semantic_components = self.generate_semantic_components()
         # chance of an adult agent to die and be replaced
         self.turnover_chance = turnover_chance / 100
         self.turnover_threshold = turnover_threshold
@@ -49,13 +50,32 @@ class IconicityModel(Model):
             y = cell[2]
 
             # create agent and place in cell
-            self.create_agent(x, y, 1, "L1")
+            self.create_agent(x, y, 0, "L1", True)
 
         # data collection
         self.datacollector = DataCollector(
             model_reporters={"Total avg. iconicity": compute_total_average_iconicity,
                              "L1 avg. iconicity": compute_l1_average_iconicity,
                              "L2 avg. iconicity": compute_l2_average_iconicity})
+
+    def generate_semantic_components(self):
+        """Generates the semantic components that will be used in the model"""
+        components = []
+
+        # generate the components
+        while len(components) < self.vocab_size:
+            bits = []
+            # generate the bitstring
+            for _ in range(self.word_length):
+                b = str(random.randint(0, 1))
+                bits.append(b)
+            component = ''.join(bits)
+
+            # check if the generated component is not a duplicate
+            if component not in components:
+                components.append(component)
+
+        return components
 
     def random_agents(self, amount):
         """Returns a list of random agents on the grid"""
@@ -75,13 +95,17 @@ class IconicityModel(Model):
         # returns a list of the agents of the cells in the provided cell list
         return self.grid.get_cell_list_contents(positions)
 
-    def create_agent(self, x, y, age, aoa):
+    def create_agent(self, x, y, age, aoa, generation_zero):
         """Creates a new agent and places it in a cell on the grid"""
         unique_id = self.next_id()  # mesa built-in procedure to increment the counter of the ids
-        a = SignerAgent(unique_id, self, age, aoa, self.vocab_size, self.word_length, self.initial_error,
+        a = SignerAgent(unique_id, self, age, aoa, self.semantic_components, self.word_length, self.initial_error,
                         self.learning_error)
         self.grid.position_agent(a, x, y)
         self.schedule.add(a)
+
+        # If generation zero, the phonological components must be initialised
+        if generation_zero:
+            a.fill_initial_vocabulary()
 
     def remove_agent(self, a):
         """Removes an agent from the model and from the grid"""
@@ -112,10 +136,10 @@ class IconicityModel(Model):
                 # remove the old agent
                 self.remove_agent(a)
                 # create a new agent and place it at the old agent's location
-                self.create_agent(x, y, new_age, new_aoa)
+                self.create_agent(x, y, new_age, new_aoa, False)
 
     def step(self):
         """Advance the model by one step"""
-        self.datacollector.collect(self)
         self.schedule.step()
         self.replace_agents()
+        self.datacollector.collect(self)

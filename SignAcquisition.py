@@ -2,68 +2,59 @@ import random
 
 
 def sign_acquisition(agent):
-    # DO WE DO THIS FOR EACH NEIGHBOUR WITH A FOR-LOOP OR JUST ONE RANDOM NEIGHBOUR?
-
     # depending on the properties of the acquiring agent, it will acquire the word differently
     if agent.aoa == "L1":  # if agent is an L1 signer
+        print("sign acquisition - L1")
         if agent.age >= 0:
-            # neighbours are fetched of the agent that needs to acquire a word
-            neighbours = list(filter(lambda a: a.age > 0 and a.get_vocab_size() > 0,
-                                     agent.get_neighbours()))  # filter children + empty vocabs out
+            # choose a random semantic component
+            semantic_components = list(agent.vocabulary.keys())
+            random_semantic_component = random.choice(semantic_components)
+
+            # neighbours are fetched of the agent that acquires a word
+            neighbours = list(filter(lambda a: a.age > 0 and a.has_phonological_component(random_semantic_component),
+                                     agent.get_neighbours()))  # filter children + sem comp that don't have phon comp
 
             if len(neighbours) > 0:
-                # random neighbour is chosen
-                random_neighbour = random.choice(neighbours)
-                neighbour_vocabulary = random_neighbour.vocabulary
-
-                if len(neighbour_vocabulary) > 0:  # vocabulary should not be empty
-                    semantic_components = list(neighbour_vocabulary.keys())
-
-                    # choose random word
-                    random_semantic_component = random.choice(semantic_components)
-                    phonological_component = select_highest_occurrence(random_semantic_component, neighbours)
-
-                    # add word with most common phonological component
-                    agent.add_word(random_semantic_component, phonological_component)
+                # get the phonological component that has the highest occurrence among neighbours
+                phonological_component = select_highest_occurrence(random_semantic_component, neighbours)
+                # add word with most common phonological component
+                agent.add_word(random_semantic_component, phonological_component)
 
     # depending on the properties of the acquiring agent, it will acquire the word differently
     if agent.aoa == "L2":  # if agent is an L2 signer
+        print("sign acquisition - L2")
         if agent.age > 0:
+            # choose a random semantic component
+            semantic_components = list(agent.vocabulary.keys())
+            random_semantic_component = random.choice(semantic_components)
+
             # get random agents from across the grid
-            interlocutors = list(filter(lambda a: a.age > 0 and a.get_vocab_size() > 0,
+            interlocutors = list(filter(lambda a: a.age > 0 and a.has_phonological_component(random_semantic_component),
                                         agent.model.random_agents(8)))  # filter children + empty vocabs out
 
             if len(interlocutors) > 0:
-                # random agent is chosen
-                random_interlocutor = random.choice(interlocutors)
-                interlocutor_vocabulary = random_interlocutor.vocabulary
-                semantic_components = list(interlocutor_vocabulary.keys())
-
-                # choose random word
-                random_semantic_component = random.choice(semantic_components)
                 phonological_component = select_most_iconic_occurrence(random_semantic_component, interlocutors)
                 learned_phonological_component = learn_phonological_component(agent, phonological_component)
 
-                # add word with the most iconic phonological component - if same for every interlocutor, then take mode
+                # add word with most iconic phonological component - if same for every interlocutor, then take mode
                 agent.add_word(random_semantic_component, learned_phonological_component)
 
 
 def select_highest_occurrence(semantic_component, neighbours):
     # keep a counter (value) for each phonological component (key) of a semantic component in a dictionary
+    print("select highest occurrence")
     phonological_counters = dict()
 
-    # for every neighbour we check if they have the semantic component in their vocabulary
+    # for every neighbour we check if the semantic component has a phonological component
     for neighbour in neighbours:
-        if semantic_component in neighbour.vocabulary:
-            # if so, we fetch the phonological component
-            phonological_component = neighbour.vocabulary[semantic_component]
+        phonological_component = neighbour.vocabulary[semantic_component]
 
-            # we add the phonological component to the counter dictionary with their updated counter
-            if phonological_component in phonological_counters:
-                old_counter = phonological_counters[phonological_component]
-                phonological_counters[phonological_component] = old_counter + 1
-            else:
-                phonological_counters[phonological_component] = 1
+        # we add the phonological component to the counter dictionary with their updated counter
+        if phonological_component in phonological_counters:
+            old_counter = phonological_counters[phonological_component]
+            phonological_counters[phonological_component] = old_counter + 1
+        else:
+            phonological_counters[phonological_component] = 1
 
     # getting the key with maximum value in counter dictionary
     return max(phonological_counters, key=phonological_counters.get)
@@ -71,30 +62,43 @@ def select_highest_occurrence(semantic_component, neighbours):
 
 def select_most_iconic_occurrence(semantic_component, interlocutors):
     # keep degree of iconicity (value) for each phonological component (key) of a semantic component in a dictionary
+    print("select most iconic occurrence")
     degrees_of_iconicity = dict()
 
-    # for every interlocutor we check if they have the semantic component in their vocabulary
+    #  for every interlocutor we do the following
     for interlocutor in interlocutors:
-        if semantic_component in interlocutor.vocabulary:
-            # if so, we fetch the phonological component
-            phonological_component = interlocutor.vocabulary[semantic_component]
-            # calculate the degree of iconicity
-            degree_of_iconicity = calculate_degree_of_iconicity(semantic_component, phonological_component)
+        # we fetch the phonological component
+        phonological_component = interlocutor.vocabulary[semantic_component]
+        # calculate the degree of iconicity
+        degree_of_iconicity = calculate_degree_of_iconicity(semantic_component, phonological_component)
 
-            # we add the phonological component to the degree dictionary with their calculated degree
-            if phonological_component not in degrees_of_iconicity:
-                degrees_of_iconicity[phonological_component] = degree_of_iconicity
+        print(1)
+        # we add the phonological component to the degree dictionary with their calculated degree
+        if phonological_component not in degrees_of_iconicity:
+            degrees_of_iconicity[phonological_component] = degree_of_iconicity
 
-    # getting the key with maximum value in counter dictionary
-    max_degree = max(degrees_of_iconicity, key=degrees_of_iconicity.get)
+    print(2)
+    # the phonological component with the maximum degree of iconicity in the counter dictionary
+    max_phonological_component = max(degrees_of_iconicity, key=degrees_of_iconicity.get)
+    print(3)
+    # the degree of iconicity associated with it, which should be the highest
+    max_degree = degrees_of_iconicity[max_phonological_component]
+    print(4)
+    # fetch the all phonological components that have this maximum degree (might be more than the one we found)
+    phonological_components_with_max_degree = [p for p, d in degrees_of_iconicity.items()
+                                               if d == max_degree]
+    print(5)
     # if multiple phonological components have the this degree of iconicity, the mode will be taken
-    if len([p for p, d in degrees_of_iconicity.items() if d == max_degree]) > 1:
-        get_mode(list(degrees_of_iconicity.keys()), interlocutors)
+    if len(phonological_components_with_max_degree) > 1:
+        most_common_phonological_component = get_mode(semantic_component, phonological_components_with_max_degree,
+                                                      interlocutors)
+        return most_common_phonological_component
     else:
-        return max_degree
+        return max_phonological_component
 
 
 def calculate_degree_of_iconicity(semantic_component, phonological_component):
+    print("calculate degree of iconicity")
     matched_bits = 0
     semantic_bits = [char for char in semantic_component]
     phonological_bits = [char for char in phonological_component]
@@ -108,16 +112,19 @@ def calculate_degree_of_iconicity(semantic_component, phonological_component):
     return matched_bits / len(semantic_bits)
 
 
-def get_mode(phonological_components, interlocutors):
+def get_mode(semantic_component, phonological_components, interlocutors):
     # keep a counter for each occurrence of a phonological components in the interlocutors' vocabulary
+    print("get mode")
     counters = dict()
 
-    # for each phonological component, we keep a counter
-    for phonological_component in phonological_components:
-        # we check the vocabulary of each of the interlocutors
-        for interlocutor in interlocutors:
-            # update counter
-            if phonological_component in interlocutor.vocabulary:
+    # for each interlocutor we do the following
+    for interlocutor in interlocutors:
+        # get the phonological component associated with the semantic component
+        phonological_components_of_interlocutor = interlocutor.vocabulary[semantic_component]
+        # we check whether phonological component is one that has max degree of iconicity (listed in phon_components)
+        for phonological_component in phonological_components:
+            # if they are the same, increase the counter or introduce one
+            if phonological_component == phonological_components_of_interlocutor:
                 if phonological_component in counters:
                     old_counter = counters[phonological_component]
                     counters[phonological_component] = old_counter + 1
@@ -129,6 +136,7 @@ def get_mode(phonological_components, interlocutors):
 
 
 def learn_phonological_component(agent, phonological_component):
+    print("learn phonological component")
     phonological_bits = [bit for bit in phonological_component]
     length = len(phonological_bits)
     # random bits that will be flipped
