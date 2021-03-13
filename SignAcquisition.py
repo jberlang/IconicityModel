@@ -4,7 +4,6 @@ import random
 def sign_acquisition(agent):
     # depending on the properties of the acquiring agent, it will acquire the word differently
     if agent.aoa == "L1":  # if agent is an L1 signer
-        print("sign acquisition - L1")
         if agent.age >= 0:
             # choose a random semantic component
             semantic_components = list(agent.vocabulary.keys())
@@ -22,7 +21,6 @@ def sign_acquisition(agent):
 
     # depending on the properties of the acquiring agent, it will acquire the word differently
     if agent.aoa == "L2":  # if agent is an L2 signer
-        print("sign acquisition - L2")
         if agent.age > 0:
             # choose a random semantic component
             semantic_components = list(agent.vocabulary.keys())
@@ -42,7 +40,6 @@ def sign_acquisition(agent):
 
 def select_highest_occurrence(semantic_component, neighbours):
     # keep a counter (value) for each phonological component (key) of a semantic component in a dictionary
-    print("select highest occurrence")
     phonological_counters = dict()
 
     # for every neighbour we check if the semantic component has a phonological component
@@ -62,7 +59,6 @@ def select_highest_occurrence(semantic_component, neighbours):
 
 def select_most_iconic_occurrence(semantic_component, interlocutors):
     # keep degree of iconicity (value) for each phonological component (key) of a semantic component in a dictionary
-    print("select most iconic occurrence")
     degrees_of_iconicity = dict()
 
     #  for every interlocutor we do the following
@@ -72,22 +68,17 @@ def select_most_iconic_occurrence(semantic_component, interlocutors):
         # calculate the degree of iconicity
         degree_of_iconicity = calculate_degree_of_iconicity(semantic_component, phonological_component)
 
-        print(1)
         # we add the phonological component to the degree dictionary with their calculated degree
         if phonological_component not in degrees_of_iconicity:
             degrees_of_iconicity[phonological_component] = degree_of_iconicity
 
-    print(2)
     # the phonological component with the maximum degree of iconicity in the counter dictionary
     max_phonological_component = max(degrees_of_iconicity, key=degrees_of_iconicity.get)
-    print(3)
     # the degree of iconicity associated with it, which should be the highest
     max_degree = degrees_of_iconicity[max_phonological_component]
-    print(4)
     # fetch the all phonological components that have this maximum degree (might be more than the one we found)
     phonological_components_with_max_degree = [p for p, d in degrees_of_iconicity.items()
                                                if d == max_degree]
-    print(5)
     # if multiple phonological components have the this degree of iconicity, the mode will be taken
     if len(phonological_components_with_max_degree) > 1:
         most_common_phonological_component = get_mode(semantic_component, phonological_components_with_max_degree,
@@ -98,7 +89,6 @@ def select_most_iconic_occurrence(semantic_component, interlocutors):
 
 
 def calculate_degree_of_iconicity(semantic_component, phonological_component):
-    print("calculate degree of iconicity")
     matched_bits = 0
     semantic_bits = [char for char in semantic_component]
     phonological_bits = [char for char in phonological_component]
@@ -114,7 +104,6 @@ def calculate_degree_of_iconicity(semantic_component, phonological_component):
 
 def get_mode(semantic_component, phonological_components, interlocutors):
     # keep a counter for each occurrence of a phonological components in the interlocutors' vocabulary
-    print("get mode")
     counters = dict()
 
     # for each interlocutor we do the following
@@ -136,7 +125,6 @@ def get_mode(semantic_component, phonological_components, interlocutors):
 
 
 def learn_phonological_component(agent, phonological_component):
-    print("learn phonological component")
     phonological_bits = [bit for bit in phonological_component]
     length = len(phonological_bits)
     # random bits that will be flipped
