@@ -138,8 +138,13 @@ class IconicityModel(Model):
                 # create a new agent and place it at the old agent's location
                 self.create_agent(x, y, new_age, new_aoa, False)
 
+    def for_each_agent(self, f):
+        for agent in self.schedule.agents:
+            f(agent)
+
     def step(self):
         """Advance the model by one step"""
         self.schedule.step()
         self.replace_agents()
+        self.for_each_agent(sign_acquisition)
         self.datacollector.collect(self)

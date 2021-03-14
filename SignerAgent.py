@@ -98,5 +98,5 @@ class SignerAgent(Agent):
 
     def step(self):
         """Advance the agent by one step"""
-        sign_acquisition(self)
+        # sign_acquisition(self)
         self.age_up()
