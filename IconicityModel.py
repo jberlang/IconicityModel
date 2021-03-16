@@ -43,6 +43,9 @@ class IconicityModel(Model):
         # ranges of agent properties
         self.aoa_range = ["L1", "L2"]
 
+        # number of steps
+        self.step_counter = 0
+
         # create agents
         for cell in self.grid.coord_iter():
             # unique iq and position of cell
@@ -144,7 +147,9 @@ class IconicityModel(Model):
 
     def step(self):
         """Advance the model by one step"""
+        self.step_counter += 1
         self.schedule.step()
         self.replace_agents()
         self.for_each_agent(sign_acquisition)
-        self.datacollector.collect(self)
+        if self.step_counter > 1:
+            self.datacollector.collect(self)

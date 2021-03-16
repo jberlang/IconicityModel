@@ -29,7 +29,7 @@ class SignerAgent(Agent):
 
     def non_empty_vocab(self):
         """Checks whether the dictionary contains phonological components"""
-        amount_of_non_empty_entries = len(list(filter(lambda p: p == "N/A", list(self.vocabulary.items()))))
+        amount_of_non_empty_entries = len(list(filter(lambda p: p != "N/A", list(self.vocabulary.values()))))
         return amount_of_non_empty_entries > 0
 
     def has_phonological_component(self, semantic_component):
