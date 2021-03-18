@@ -151,5 +151,4 @@ class IconicityModel(Model):
         self.schedule.step()
         self.replace_agents()
         self.for_each_agent(sign_acquisition)
-        if self.step_counter > 1:
-            self.datacollector.collect(self)
+        self.datacollector.collect(self)

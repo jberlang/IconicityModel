@@ -16,8 +16,9 @@ def sign_acquisition(agent):
             if len(neighbours) > 0:
                 # get the phonological component that has the highest occurrence among neighbours
                 phonological_component = select_highest_occurrence(random_semantic_component, neighbours)
+                learned_phonological_component = learn_phonological_component(agent, phonological_component)
                 # add word with most common phonological component
-                agent.add_word(random_semantic_component, phonological_component)
+                agent.add_word(random_semantic_component, learned_phonological_component)
 
     # depending on the properties of the acquiring agent, it will acquire the word differently
     if agent.aoa == "L2":  # if agent is an L2 signer
