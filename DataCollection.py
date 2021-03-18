@@ -2,14 +2,21 @@
 # This section contains functions that allows us to collect data from both the model and the agents.
 
 def compute_total_average_iconicity(model):
+    print("compute_total_average_iconicity")
     """Calculates the average iconicity over the whole model"""
     all_agents = list(filter(lambda a: a.non_empty_vocab(), model.schedule.agents))
     all_agent_iconicity_ratios = [agent.iconicity_ratio() for agent in all_agents]
     total_number_of_agents = len(all_agent_iconicity_ratios)
-    return round((sum(all_agent_iconicity_ratios) / total_number_of_agents) * 100) / 100
+    print(sum(all_agent_iconicity_ratios))
+    print(total_number_of_agents)
+    if total_number_of_agents > 0:
+        return round((sum(all_agent_iconicity_ratios) / total_number_of_agents) * 100) / 100
+    else:
+        return 0
 
 
 def compute_l1_average_iconicity(model):
+    print("compute_l1_average_iconicity")
     """Calculates the average iconicity among L1 signers"""
     all_agents = list(filter(lambda a: a.non_empty_vocab(), model.schedule.agents))
     l1_agents = list(filter(lambda a: a.aoa == "L1", all_agents))
@@ -24,6 +31,7 @@ def compute_l1_average_iconicity(model):
 
 
 def compute_l2_average_iconicity(model):
+    print("compute_l2_average_iconicity")
     """Calculates the average iconicity among L2 signers"""
     all_agents = list(filter(lambda a: a.non_empty_vocab(), model.schedule.agents))
     l2_agents = list(filter(lambda a: a.aoa == "L2", all_agents))
