@@ -6,7 +6,7 @@ class SignerAgent(Agent):
     """An agent with an age, age of acquisition and a vocabulary"""
 
     def __init__(self, unique_id, iconicity_model, age, aoa, semantic_components, word_length, initial_error,
-                 learning_error):
+                 learning_error, l2_radius):
         super().__init__(unique_id, iconicity_model)
         self.unique_id = unique_id
         self.iconicity_model = iconicity_model
@@ -15,6 +15,7 @@ class SignerAgent(Agent):
         self.word_length = word_length
         self.initial_error = initial_error
         self.learning_error = learning_error
+        self.l2_radius = l2_radius
         self.age = age
         self.aoa = aoa
         self.vocabulary = self.generate_initial_vocabulary()
@@ -37,14 +38,22 @@ class SignerAgent(Agent):
         phonological_component = self.vocabulary[semantic_component]
         return phonological_component != "N/A"
 
-    def get_neighbours(self):
+    def get_neighbours(self, acquisition_radius=1):
         """Fetches all 8 neighbours of an agent on the grid"""
         # Get all 8 neighbouring coordinates, excluding the position of the agent itself in the centre
-        neighbour_positions = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=True)
+        neighbour_positions = self.model.grid.get_neighborhood(self.pos, moore=True, include_center=True,
+                                                               radius=acquisition_radius)
         # returns a list of the agents of the cells in the provided cell list
         neighbours = self.model.grid.get_cell_list_contents(neighbour_positions)
         # return this list
-        return neighbours
+        if acquisition_radius == 1:
+            return neighbours
+        # for L2 signers we need random neighbours from across the grid within a certain radius
+        else:
+            if len(neighbours) > 8:
+                return random.sample(neighbours, 8)
+            else:
+                return neighbours
 
     def generate_initial_vocabulary(self):
         """Creates a vocabulary for the agent - with no phonological components"""

@@ -26,10 +26,11 @@ def sign_acquisition(agent):
             # choose a random semantic component
             semantic_components = list(agent.vocabulary.keys())
             random_semantic_component = random.choice(semantic_components)
+            acquisition_radius = agent.l2_radius
 
             # get random agents from across the grid
             interlocutors = list(filter(lambda a: a.age > 0 and a.has_phonological_component(random_semantic_component),
-                                        agent.model.random_agents(8)))  # filter children + empty vocabs out
+                                        agent.get_neighbours(acquisition_radius)))  # filter children + empty vocabs out
 
             if len(interlocutors) > 0:
                 phonological_component = select_most_iconic_occurrence(random_semantic_component, interlocutors)

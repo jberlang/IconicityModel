@@ -11,7 +11,7 @@ class IconicityModel(Model):
     """A model with its width, height, vocabulary and word size"""
 
     def __init__(self, width, height, vocab_size, word_length, turnover_chance, turnover_threshold,
-                 initial_degree_of_iconicity, learning_error_degree):
+                 initial_degree_of_iconicity, learning_error_degree, l2_radius, l2_replace_chance):
         super().__init__()
         # parameters
         self.width = width
@@ -26,6 +26,10 @@ class IconicityModel(Model):
         self.initial_error = word_length - round((initial_degree_of_iconicity / 100) * word_length)
         # error of adults when acquiring a new phonological component
         self.learning_error = round((learning_error_degree / 100) * word_length)
+        # radius of agent from which an L2 learner can acquire signs from
+        self.l2_radius = l2_radius
+        # chance of an old agent being replaced by an L2 agent
+        self.l2_replace_chance = l2_replace_chance / 100
 
         # batch runner running status
         self.running = True
@@ -99,7 +103,7 @@ class IconicityModel(Model):
         """Creates a new agent and places it in a cell on the grid"""
         unique_id = self.next_id()  # mesa built-in procedure to increment the counter of the ids
         a = SignerAgent(unique_id, self, age, aoa, self.semantic_components, self.word_length, self.initial_error,
-                        self.learning_error)
+                        self.learning_error, self.l2_radius)
         self.grid.position_agent(a, x, y)
         self.schedule.add(a)
 
@@ -117,14 +121,18 @@ class IconicityModel(Model):
         for a in self.schedule.agents:
             # generate a random number between 0 and 1 to be compared with turnover_chance later
             dying_chance = random.uniform(0, 1)
+            replace_chance = random.uniform(0, 1)
             # agents have a possibility of dying when age > 2, but are guaranteed to die over turnover_threshold
             if (a.age >= 2 and dying_chance <= self.turnover_chance) or a.age > self.turnover_threshold:
                 # get position of agent that is to be replaced
                 x, y = a.pos
 
                 # generates new random properties
-                new_aoa = random.choice(self.aoa_range)
+                new_aoa = "L1"
                 new_age = 0
+
+                if replace_chance <= self.l2_replace_chance:
+                    new_aoa = "L2"
 
                 # an agent that replaces another can never be L1 and age 1
                 if new_aoa == "L1":
