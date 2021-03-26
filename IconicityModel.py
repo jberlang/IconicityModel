@@ -57,10 +57,10 @@ class IconicityModel(Model):
             self.create_agent(x, y, 0, "L1", True)
 
         # data collection
-        self.datacollector = DataCollector(
-            model_reporters={"Total avg. iconicity": compute_total_average_iconicity,
-                             "L1 avg. iconicity": compute_l1_average_iconicity,
-                             "L2 avg. iconicity": compute_l2_average_iconicity})
+        #self.datacollector = DataCollector(
+        #    model_reporters={"Total avg. iconicity": compute_total_average_iconicity,
+        #                     "L1 avg. iconicity": compute_l1_average_iconicity,
+        #                     "L2 avg. iconicity": compute_l2_average_iconicity})
 
     def generate_semantic_components(self):
         """Generates the semantic components that will be used in the model"""
@@ -80,24 +80,6 @@ class IconicityModel(Model):
                 components.append(component)
 
         return components
-
-    def random_agents(self, amount):
-        """Returns a list of random agents on the grid"""
-        positions = []
-        i = 0
-
-        while i < amount:
-            # generate random coordinates
-            x = random.randint(0, self.width - 1)
-            y = random.randint(0, self.height - 1)
-
-            # make sure there are no duplicates
-            if (x, y) not in positions:
-                positions.append((x, y))
-            i += 1
-
-        # returns a list of the agents of the cells in the provided cell list
-        return self.grid.get_cell_list_contents(positions)
 
     def create_agent(self, x, y, age, aoa, generation_zero):
         """Creates a new agent and places it in a cell on the grid"""
@@ -133,12 +115,6 @@ class IconicityModel(Model):
 
                 if replace_chance <= self.l2_replace_chance:
                     new_aoa = "L2"
-
-                # an agent that replaces another can never be L1 and age 1
-                if new_aoa == "L1":
-                    new_age = 0
-                # a L2 agent can never have age 0
-                if new_aoa == "L2":
                     new_age = 1
 
                 # remove the old agent
@@ -155,4 +131,4 @@ class IconicityModel(Model):
         self.schedule.step()
         self.replace_agents()
         self.for_each_agent(sign_acquisition)
-        self.datacollector.collect(self)
+        #self.datacollector.collect(self)

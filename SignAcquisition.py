@@ -2,42 +2,56 @@ import random
 
 
 def sign_acquisition(agent):
-    # depending on the properties of the acquiring agent, it will acquire the word differently
-    if agent.aoa == "L1":  # if agent is an L1 signer
-        if agent.age >= 0:
-            # choose a random semantic component
-            semantic_components = list(agent.vocabulary.keys())
+    # list of semantic components for which a phonological component can be acquired
+    semantic_components = list(agent.vocabulary.keys())
+    # choose an initial random semantic component to acquire
+    random_semantic_component = random.choice(semantic_components)
+    # get interlocutors to acquire from
+    interlocutors = get_interlocutors(agent)
+    # list of semantic components for which a phonological component has been acquired
+    learned_components = []
+
+    # for each interlocutor, the following is done
+    for _ in interlocutors:
+        # choose a random semantic component for which a phonological component hasn't been acquired yet
+        while random_semantic_component in learned_components:
             random_semantic_component = random.choice(semantic_components)
+        learned_components.append(random_semantic_component)
+        filtered_interlocutors = filter_interlocutors(interlocutors, random_semantic_component)
 
-            # neighbours are fetched of the agent that acquires a word
-            neighbours = list(filter(lambda a: a.age > 0 and a.has_phonological_component(random_semantic_component),
-                                     agent.get_neighbours()))  # filter children + sem comp that don't have phon comp
+        if len(filtered_interlocutors) > 0:
+            # get the phonological component that has the highest occurrence among neighbours for that random sem. comp.
+            phonological_component = random_semantic_component  # default 100% iconic, but will be replaced
+            if agent.aoa == "L1":
+                phonological_component = select_highest_occurrence(random_semantic_component,
+                                                                   filtered_interlocutors)
+            if agent.aoa == "L2":
+                phonological_component = select_most_iconic_occurrence(random_semantic_component,
+                                                                       filtered_interlocutors)
 
-            if len(neighbours) > 0:
-                # get the phonological component that has the highest occurrence among neighbours
-                phonological_component = select_highest_occurrence(random_semantic_component, neighbours)
-                learned_phonological_component = learn_phonological_component(agent, phonological_component)
-                # add word with most common phonological component
-                agent.add_word(random_semantic_component, learned_phonological_component)
+            # add an error in the acquired phonological component
+            learned_phonological_component = learn_phonological_component(agent, phonological_component)
 
-    # depending on the properties of the acquiring agent, it will acquire the word differently
-    if agent.aoa == "L2":  # if agent is an L2 signer
-        if agent.age > 0:
-            # choose a random semantic component
-            semantic_components = list(agent.vocabulary.keys())
-            random_semantic_component = random.choice(semantic_components)
-            acquisition_radius = agent.l2_radius
+            # add the acquired phonological component to the vocabulary of the agent that acquires it
+            agent.add_word(random_semantic_component, learned_phonological_component)
 
-            # get random agents from across the grid
-            interlocutors = list(filter(lambda a: a.age > 0 and a.has_phonological_component(random_semantic_component),
-                                        agent.get_neighbours(acquisition_radius)))  # filter children + empty vocabs out
 
-            if len(interlocutors) > 0:
-                phonological_component = select_most_iconic_occurrence(random_semantic_component, interlocutors)
-                learned_phonological_component = learn_phonological_component(agent, phonological_component)
+def get_interlocutors(agent):
+    interlocutors = []
 
-                # add word with most iconic phonological component - if same for every interlocutor, then take mode
-                agent.add_word(random_semantic_component, learned_phonological_component)
+    if agent.aoa == "L1":
+        # filter children + sem comp that don't have phon comp
+        interlocutors = list(filter(lambda a: a.age > 0, agent.get_neighbours()))
+    elif agent.aoa == "L2":
+        # filter children + empty vocabs out
+        acquisition_radius = agent.l2_radius
+        interlocutors = list(filter(lambda a: a.age > 0, agent.get_neighbours(acquisition_radius)))
+
+    return interlocutors
+
+
+def filter_interlocutors(interlocutors, semantic_component):
+    return list(filter(lambda i: i.has_phonological_component(semantic_component), interlocutors))
 
 
 def select_highest_occurrence(semantic_component, neighbours):
