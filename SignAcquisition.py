@@ -3,7 +3,7 @@ import random
 
 def sign_acquisition(agent):
     # list of semantic components for which a phonological component can be acquired
-    semantic_components = list(agent.vocabulary.keys())
+    semantic_components = agent.semantic_components
     # choose an initial random semantic component to acquire
     random_semantic_component = random.choice(semantic_components)
     # get interlocutors to acquire from
@@ -23,7 +23,7 @@ def sign_acquisition(agent):
             # get the phonological component that has the highest occurrence among neighbours for that random sem. comp.
             phonological_component = random_semantic_component  # default 100% iconic, but will be replaced
             if agent.aoa == "L1":
-                phonological_component = select_highest_occurrence(random_semantic_component,
+            phonological_component = select_highest_occurrence(random_semantic_component,
                                                                    filtered_interlocutors)
             if agent.aoa == "L2":
                 phonological_component = select_most_iconic_occurrence(random_semantic_component,
@@ -82,7 +82,7 @@ def select_most_iconic_occurrence(semantic_component, interlocutors):
         # we fetch the phonological component
         phonological_component = interlocutor.vocabulary[semantic_component]
         # calculate the degree of iconicity
-        degree_of_iconicity = calculate_degree_of_iconicity(semantic_component, phonological_component)
+        degree_of_iconicity = interlocutor.calculate_iconicity_degree(semantic_component, phonological_component)
 
         # we add the phonological component to the degree dictionary with their calculated degree
         if phonological_component not in degrees_of_iconicity:
@@ -102,20 +102,6 @@ def select_most_iconic_occurrence(semantic_component, interlocutors):
         return most_common_phonological_component
     else:
         return max_phonological_component
-
-
-def calculate_degree_of_iconicity(semantic_component, phonological_component):
-    matched_bits = 0
-    semantic_bits = [char for char in semantic_component]
-    phonological_bits = [char for char in phonological_component]
-
-    # check how many bits the semantic and phonological component have in common
-    for idx in range(len(semantic_bits)):
-        if semantic_bits[idx] == phonological_bits[idx]:
-            matched_bits += 1
-
-    # amount of common bits divided by total amount of bits, resulting in the degree of iconicity
-    return matched_bits / len(semantic_bits)
 
 
 def get_mode(semantic_component, phonological_components, interlocutors):

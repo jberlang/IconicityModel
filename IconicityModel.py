@@ -18,6 +18,7 @@ class IconicityModel(Model):
         self.height = height
         self.vocab_size = vocab_size
         self.word_length = word_length
+        self.initial_degree_of_iconicity = initial_degree_of_iconicity / 100
         self.semantic_components = self.generate_semantic_components()
         # chance of an adult agent to die and be replaced
         self.turnover_chance = turnover_chance / 100
@@ -57,10 +58,10 @@ class IconicityModel(Model):
             self.create_agent(x, y, 0, "L1", True)
 
         # data collection
-        #self.datacollector = DataCollector(
-        #    model_reporters={"Total avg. iconicity": compute_total_average_iconicity,
-        #                     "L1 avg. iconicity": compute_l1_average_iconicity,
-        #                     "L2 avg. iconicity": compute_l2_average_iconicity})
+        self.datacollector = DataCollector(
+            model_reporters={"Total avg. iconicity": compute_total_average_iconicity,
+                             "L1 avg. iconicity": compute_l1_average_iconicity,
+                             "L2 avg. iconicity": compute_l2_average_iconicity})
 
     def generate_semantic_components(self):
         """Generates the semantic components that will be used in the model"""
@@ -84,8 +85,8 @@ class IconicityModel(Model):
     def create_agent(self, x, y, age, aoa, generation_zero):
         """Creates a new agent and places it in a cell on the grid"""
         unique_id = self.next_id()  # mesa built-in procedure to increment the counter of the ids
-        a = SignerAgent(unique_id, self, age, aoa, self.semantic_components, self.word_length, self.initial_error,
-                        self.learning_error, self.l2_radius)
+        a = SignerAgent(unique_id, self, age, aoa, self.semantic_components, self.initial_degree_of_iconicity,
+                        self.word_length, self.initial_error, self.learning_error, self.l2_radius)
         self.grid.position_agent(a, x, y)
         self.schedule.add(a)
 
@@ -131,4 +132,4 @@ class IconicityModel(Model):
         self.schedule.step()
         self.replace_agents()
         self.for_each_agent(sign_acquisition)
-        #self.datacollector.collect(self)
+        self.datacollector.collect(self)
