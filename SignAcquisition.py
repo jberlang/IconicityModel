@@ -3,37 +3,34 @@ import random
 
 def sign_acquisition(agent):
     # list of semantic components for which a phonological component can be acquired
-    semantic_components = agent.semantic_components
-    # choose an initial random semantic component to acquire
-    random_semantic_component = random.choice(semantic_components)
+    semantic_components = agent.semantic_components.copy()
     # get interlocutors to acquire from
     interlocutors = get_interlocutors(agent)
-    # list of semantic components for which a phonological component has been acquired
-    learned_components = []
 
     # for each interlocutor, the following is done
     for _ in interlocutors:
-        # choose a random semantic component for which a phonological component hasn't been acquired yet
-        while random_semantic_component in learned_components:
+        if len(semantic_components) > 0:
+            # choose a random semantic component for which a phonological component hasn't been acquired yet
             random_semantic_component = random.choice(semantic_components)
-        learned_components.append(random_semantic_component)
-        filtered_interlocutors = filter_interlocutors(interlocutors, random_semantic_component)
+            semantic_components.remove(random_semantic_component)
+            filtered_interlocutors = filter_interlocutors(interlocutors, random_semantic_component)
 
-        if len(filtered_interlocutors) > 0:
-            # get the phonological component that has the highest occurrence among neighbours for that random sem. comp.
-            phonological_component = random_semantic_component  # default 100% iconic, but will be replaced
-            if agent.aoa == "L1":
-            phonological_component = select_highest_occurrence(random_semantic_component,
-                                                                   filtered_interlocutors)
-            if agent.aoa == "L2":
-                phonological_component = select_most_iconic_occurrence(random_semantic_component,
+            if len(filtered_interlocutors) > 0:
+                # get the phonological component that has the highest occurrence among neighbours for that random
+                # sem. comp.
+                phonological_component = random_semantic_component  # default 100% iconic, but will be replaced
+                if agent.aoa == "L1":
+                    phonological_component = select_highest_occurrence(random_semantic_component,
                                                                        filtered_interlocutors)
+                if agent.aoa == "L2":
+                    phonological_component = select_most_iconic_occurrence(random_semantic_component,
+                                                                           filtered_interlocutors)
 
-            # add an error in the acquired phonological component
-            learned_phonological_component = learn_phonological_component(agent, phonological_component)
+                # add an error in the acquired phonological component
+                learned_phonological_component = learn_phonological_component(agent, phonological_component)
 
-            # add the acquired phonological component to the vocabulary of the agent that acquires it
-            agent.add_word(random_semantic_component, learned_phonological_component)
+                # add the acquired phonological component to the vocabulary of the agent that acquires it
+                agent.add_word(random_semantic_component, learned_phonological_component)
 
 
 def get_interlocutors(agent):

@@ -1,5 +1,5 @@
 from mesa import Agent
-from SignAcquisition import *
+import random
 
 
 class SignerAgent(Agent):

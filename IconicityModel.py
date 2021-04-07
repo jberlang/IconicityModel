@@ -4,7 +4,7 @@ from mesa.space import SingleGrid  # at most one agent per cell
 from mesa.datacollection import DataCollector
 from SignerAgent import *
 from DataCollection import *
-import random
+from SignAcquisition import *
 
 
 class IconicityModel(Model):
