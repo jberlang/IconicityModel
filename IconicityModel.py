@@ -58,10 +58,14 @@ class IconicityModel(Model):
             self.create_agent(x, y, 0, "L1", True)
 
         # data collection
-        self.datacollector = DataCollector(
-            model_reporters={"Total avg. iconicity": compute_total_average_iconicity,
-                             "L1 avg. iconicity": compute_l1_average_iconicity,
-                             "L2 avg. iconicity": compute_l2_average_iconicity})
+        self.year = 0
+        self.l1_avg_iconicity = initial_degree_of_iconicity
+        self.l2_avg_iconicity = initial_degree_of_iconicity
+        self.total_avg_iconicity = initial_degree_of_iconicity
+        self.datacollector = DataCollector({'l1_avg_iconicity': 'l1_avg_iconicity',
+                                            'l2_avg_iconicity': 'l2_avg_iconicity',
+                                            'total_avg_iconicity': 'total_avg_iconicity',
+                                            'year': 'year'})
 
     def generate_semantic_components(self):
         """Generates the semantic components that will be used in the model"""
@@ -127,9 +131,16 @@ class IconicityModel(Model):
         for agent in self.schedule.agents:
             f(agent)
 
+    def collect_data(self):
+        self.year += 1
+        self.l1_avg_iconicity = compute_l1_average_iconicity(self)
+        self.l2_avg_iconicity = compute_l2_average_iconicity(self)
+        self.total_avg_iconicity = compute_total_average_iconicity(self)
+        self.datacollector.collect(self)
+
     def step(self):
         """Advance the model by one step"""
         self.schedule.step()
         self.replace_agents()
         self.for_each_agent(sign_acquisition)
-        self.datacollector.collect(self)
+        self.collect_data()
