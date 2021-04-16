@@ -4,7 +4,6 @@ from mesa.space import SingleGrid  # at most one agent per cell
 from mesa.datacollection import DataCollector
 from SignerAgent import *
 from DataCollection import *
-from SignAcquisition import *
 
 
 class IconicityModel(Model):
@@ -127,10 +126,6 @@ class IconicityModel(Model):
                 # create a new agent and place it at the old agent's location
                 self.create_agent(x, y, new_age, new_aoa, False)
 
-    def for_each_agent(self, f):
-        for agent in self.schedule.agents:
-            f(agent)
-
     def collect_data(self):
         self.year += 1
         self.l1_avg_iconicity = compute_l1_average_iconicity(self)
@@ -142,5 +137,4 @@ class IconicityModel(Model):
         """Advance the model by one step"""
         self.schedule.step()
         self.replace_agents()
-        self.for_each_agent(sign_acquisition)
         self.collect_data()

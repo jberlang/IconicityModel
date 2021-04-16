@@ -1,4 +1,5 @@
 from mesa import Agent
+from SignAcquisition import *
 import random
 
 
@@ -20,8 +21,9 @@ class SignerAgent(Agent):
         self.age = age
         self.aoa = aoa
         self.vocabulary, self.iconicity_degrees = self.generate_initial_vocabulary()
+        self.signs_acquired = False
 
-    def add_word(self, semantic_component, phonological_component):
+    def add_sign(self, semantic_component, phonological_component):
         """Add a word to the agent's dictionary: key is semantic component and value is phonological component"""
         self.vocabulary[semantic_component] = phonological_component
         self.iconicity_degrees[semantic_component] = self.calculate_iconicity_degree(semantic_component,
@@ -115,3 +117,6 @@ class SignerAgent(Agent):
     def step(self):
         """Advance the agent by one step"""
         self.age_up()
+        if not self.signs_acquired:
+            sign_acquisition(self)
+            self.signs_acquired = True

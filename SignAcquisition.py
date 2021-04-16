@@ -9,7 +9,7 @@ def sign_acquisition(agent):
 
     # for each interlocutor, the following is done
     for _ in interlocutors:
-        if len(semantic_components) > 0:
+        while len(semantic_components) > 0:
             # choose a random semantic component for which a phonological component hasn't been acquired yet
             random_semantic_component = random.choice(semantic_components)
             semantic_components.remove(random_semantic_component)
@@ -30,7 +30,7 @@ def sign_acquisition(agent):
                 learned_phonological_component = learn_phonological_component(agent, phonological_component)
 
                 # add the acquired phonological component to the vocabulary of the agent that acquires it
-                agent.add_word(random_semantic_component, learned_phonological_component)
+                agent.add_sign(random_semantic_component, learned_phonological_component)
 
 
 def get_interlocutors(agent):
