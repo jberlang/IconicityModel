@@ -47,15 +47,6 @@ class IconicityModel(Model):
         # ranges of agent properties
         self.aoa_range = ["L1", "L2"]
 
-        # create agents
-        for cell in self.grid.coord_iter():
-            # unique iq and position of cell
-            x = cell[1]
-            y = cell[2]
-
-            # create agent and place in cell
-            self.create_agent(x, y, 0, "L1", True)
-
         # data collection
         self.year = 0
         self.l1_avg_iconicity = initial_degree_of_iconicity
@@ -65,6 +56,15 @@ class IconicityModel(Model):
                                             'l2_avg_iconicity': 'l2_avg_iconicity',
                                             'total_avg_iconicity': 'total_avg_iconicity',
                                             'year': 'year'})
+
+        # create agents
+        for cell in self.grid.coord_iter():
+            # unique iq and position of cell
+            x = cell[1]
+            y = cell[2]
+
+            # create agent and place in cell
+            self.create_agent(x, y, 0, "L1", True)
 
     def generate_semantic_components(self):
         """Generates the semantic components that will be used in the model"""
@@ -93,7 +93,7 @@ class IconicityModel(Model):
         self.grid.position_agent(a, x, y)
         self.schedule.add(a)
 
-        # If generation zero, the phonological components must be initialised
+        # If generation zero, the phonological components must be initialised with a phonological component
         if generation_zero:
             a.fill_initial_vocabulary()
 

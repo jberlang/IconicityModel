@@ -12,12 +12,12 @@ def sign_acquisition(agent):
         while len(semantic_components) > 0:
             # choose a random semantic component for which a phonological component hasn't been acquired yet
             random_semantic_component = random.choice(semantic_components)
+            # remove the sem. comp. from the list of signs to be acquired
             semantic_components.remove(random_semantic_component)
+            # filter the neighbours out that don't have a phon. comp. for it
             filtered_interlocutors = filter_interlocutors(interlocutors, random_semantic_component)
 
             if len(filtered_interlocutors) > 0:
-                # get the phonological component that has the highest occurrence among neighbours for that random
-                # sem. comp.
                 phonological_component = random_semantic_component  # default 100% iconic, but will be replaced
                 if agent.aoa == "L1":
                     phonological_component = select_highest_occurrence(random_semantic_component,
@@ -28,19 +28,19 @@ def sign_acquisition(agent):
 
                 # add an error in the acquired phonological component
                 learned_phonological_component = learn_phonological_component(agent, phonological_component)
-
                 # add the acquired phonological component to the vocabulary of the agent that acquires it
                 agent.add_sign(random_semantic_component, learned_phonological_component)
 
 
 def get_interlocutors(agent):
+    # gets neighbours according to the age of acquisition of the agent
     interlocutors = []
 
     if agent.aoa == "L1":
-        # filter children + sem comp that don't have phon comp
+        # filter children + sem comp that don't have phonological component - only immediate neighbours are considered
         interlocutors = list(filter(lambda a: a.age > 0, agent.get_neighbours()))
     elif agent.aoa == "L2":
-        # filter children + empty vocabs out
+        # filter children + empty vocabs out - a radius for neighbours is specified here
         acquisition_radius = agent.l2_radius
         interlocutors = list(filter(lambda a: a.age > 0, agent.get_neighbours(acquisition_radius)))
 
@@ -48,6 +48,7 @@ def get_interlocutors(agent):
 
 
 def filter_interlocutors(interlocutors, semantic_component):
+    # filters all the interlocutors out that don't have a phon. comp. for the given sem. comp.
     return list(filter(lambda i: i.has_phonological_component(semantic_component), interlocutors))
 
 
@@ -55,7 +56,7 @@ def select_highest_occurrence(semantic_component, neighbours):
     # keep a counter (value) for each phonological component (key) of a semantic component in a dictionary
     phonological_counters = dict()
 
-    # for every neighbour we check if the semantic component has a phonological component
+    # for every neighbour we add counters for the phon. components for that semantic component
     for neighbour in neighbours:
         phonological_component = neighbour.vocabulary[semantic_component]
 
@@ -78,8 +79,8 @@ def select_most_iconic_occurrence(semantic_component, interlocutors):
     for interlocutor in interlocutors:
         # we fetch the phonological component
         phonological_component = interlocutor.vocabulary[semantic_component]
-        # calculate the degree of iconicity
-        degree_of_iconicity = interlocutor.calculate_iconicity_degree(semantic_component, phonological_component)
+        # we fetch the degree of iconicity
+        degree_of_iconicity = interlocutor.iconicity_degrees[semantic_component]
 
         # we add the phonological component to the degree dictionary with their calculated degree
         if phonological_component not in degrees_of_iconicity:
@@ -105,19 +106,18 @@ def get_mode(semantic_component, phonological_components, interlocutors):
     # keep a counter for each occurrence of a phonological components in the interlocutors' vocabulary
     counters = dict()
 
-    # for each interlocutor we do the following
     for interlocutor in interlocutors:
         # get the phonological component associated with the semantic component
-        phonological_components_of_interlocutor = interlocutor.vocabulary[semantic_component]
+        phonological_component_of_interlocutor = interlocutor.vocabulary[semantic_component]
         # we check whether phonological component is one that has max degree of iconicity (listed in phon_components)
-        for phonological_component in phonological_components:
-            # if they are the same, increase the counter or introduce one
-            if phonological_component == phonological_components_of_interlocutor:
-                if phonological_component in counters:
-                    old_counter = counters[phonological_component]
-                    counters[phonological_component] = old_counter + 1
-                else:
-                    counters[phonological_component] = 1
+        if phonological_component_of_interlocutor in phonological_components:
+            phonological_component = phonological_component_of_interlocutor
+            # manage counters
+            if phonological_component in counters:
+                old_counter = counters[phonological_component]
+                counters[phonological_component] = old_counter + 1
+            else:
+                counters[phonological_component] = 1
 
     # return the phonological component that has the highest counter
     return max(counters, key=counters.get)

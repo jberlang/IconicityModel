@@ -20,18 +20,17 @@ class SignerAgent(Agent):
         self.l2_radius = l2_radius
         self.age = age
         self.aoa = aoa
+        # We keep a dictionary with the phon. comp. and a dictionary with the iconicity level for each component
         self.vocabulary, self.iconicity_degrees = self.generate_initial_vocabulary()
+        # A field that represents whether the agent has acquired its signs
         self.signs_acquired = False
 
     def add_sign(self, semantic_component, phonological_component):
         """Add a word to the agent's dictionary: key is semantic component and value is phonological component"""
         self.vocabulary[semantic_component] = phonological_component
+        # Update the dictionary that stores the iconicity levels
         self.iconicity_degrees[semantic_component] = self.calculate_iconicity_degree(semantic_component,
                                                                                      phonological_component)
-
-    def age_up(self):
-        """Increase the age of an agent"""
-        self.age += 1
 
     def non_empty_vocab(self):
         """Checks whether the dictionary contains phonological components"""
@@ -51,14 +50,11 @@ class SignerAgent(Agent):
         # returns a list of the agents of the cells in the provided cell list
         neighbours = self.model.grid.get_cell_list_contents(neighbour_positions)
         # return this list
-        if acquisition_radius == 1:
-            return neighbours
-        # for L2 signers we need random neighbours from across the grid within a certain radius
+        if acquisition_radius > 1:
+            # if the radius is bigger than 1, we need to sample 8 neighbours out of the list of neighbours
+            return random.sample(neighbours, 8)
         else:
-            if len(neighbours) > 8:
-                return random.sample(neighbours, 8)
-            else:
-                return neighbours
+            return neighbours
 
     def generate_initial_vocabulary(self):
         """Creates a vocabulary for the agent - with no phonological components"""
@@ -116,7 +112,7 @@ class SignerAgent(Agent):
 
     def step(self):
         """Advance the agent by one step"""
-        self.age_up()
+        self.age += 1
         if not self.signs_acquired:
             sign_acquisition(self)
             self.signs_acquired = True
