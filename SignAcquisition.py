@@ -2,34 +2,30 @@ import random
 
 
 def sign_acquisition(agent):
-    # list of semantic components for which a phonological component can be acquired
+    # list of semantic components for which a phonological component can be acquired + shuffle it
     semantic_components = agent.semantic_components.copy()
+    random.shuffle(semantic_components)
     # get interlocutors to acquire from
     interlocutors = get_interlocutors(agent)
 
-    # for each interlocutor, the following is done
-    for _ in interlocutors:
-        while len(semantic_components) > 0:
-            # choose a random semantic component for which a phonological component hasn't been acquired yet
-            random_semantic_component = random.choice(semantic_components)
-            # remove the sem. comp. from the list of signs to be acquired
-            semantic_components.remove(random_semantic_component)
-            # filter the neighbours out that don't have a phon. comp. for it
-            filtered_interlocutors = filter_interlocutors(interlocutors, random_semantic_component)
+    for random_semantic_component in semantic_components:
+        # filter the neighbours out that don't have a phonological component for it
+        filtered_interlocutors = filter_interlocutors(interlocutors, random_semantic_component)
 
-            if len(filtered_interlocutors) > 0:
-                phonological_component = random_semantic_component  # default 100% iconic, but will be replaced
-                if agent.aoa == "L1":
-                    phonological_component = select_highest_occurrence(random_semantic_component,
+        if len(filtered_interlocutors) > 0:
+            if agent.aoa == "L1":
+                phonological_component = select_highest_occurrence(random_semantic_component,
+                                                                   filtered_interlocutors)
+            if agent.aoa == "L2":
+                phonological_component = select_most_iconic_occurrence(random_semantic_component,
                                                                        filtered_interlocutors)
-                if agent.aoa == "L2":
-                    phonological_component = select_most_iconic_occurrence(random_semantic_component,
-                                                                           filtered_interlocutors)
 
-                # add an error in the acquired phonological component
-                learned_phonological_component = learn_phonological_component(agent, phonological_component)
-                # add the acquired phonological component to the vocabulary of the agent that acquires it
-                agent.add_sign(random_semantic_component, learned_phonological_component)
+            # add an error in the acquired phonological component
+            learned_phonological_component = add_error_to_phonological_component(agent, phonological_component)
+            # add the acquired phonological component to the vocabulary of the agent that acquires it
+            agent.add_sign(random_semantic_component, learned_phonological_component)
+        else:
+            print("Agent has no suitable interlocutors to learn from")
 
 
 def get_interlocutors(agent):
@@ -37,10 +33,10 @@ def get_interlocutors(agent):
     interlocutors = []
 
     if agent.aoa == "L1":
-        # filter children + sem comp that don't have phonological component - only immediate neighbours are considered
+        # filter children out - only immediate neighbours are considered
         interlocutors = list(filter(lambda a: a.age > 0, agent.get_neighbours()))
     elif agent.aoa == "L2":
-        # filter children + empty vocabs out - a radius for neighbours is specified here
+        # filter children out - a radius for neighbours is specified here
         acquisition_radius = agent.l2_radius
         interlocutors = list(filter(lambda a: a.age > 0, agent.get_neighbours(acquisition_radius)))
 
@@ -123,7 +119,7 @@ def get_mode(semantic_component, phonological_components, interlocutors):
     return max(counters, key=counters.get)
 
 
-def learn_phonological_component(agent, phonological_component):
+def add_error_to_phonological_component(agent, phonological_component):
     phonological_bits = [bit for bit in phonological_component]
     length = len(phonological_bits)
     # random bits that will be flipped
