@@ -1,5 +1,6 @@
 from mesa import Agent
 from SignAcquisition import *
+from LanguageGame import *
 import random
 
 
@@ -116,3 +117,4 @@ class SignerAgent(Agent):
         if not self.signs_acquired:
             sign_acquisition(self)
             self.signs_acquired = True
+        play_language_game(self)

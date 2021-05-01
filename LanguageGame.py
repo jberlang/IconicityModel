@@ -5,7 +5,7 @@ from fuzzywuzzy import fuzz
 def play_language_game(agent):
     # get interlocutors
     interlocutors = agent.get_neighbours()
-    # select a random interlocutor
+    # select a hearer from the interlocutors
     hearer = random.choice(interlocutors)
     # get interlocutors' vocabulary
     hearer_vocab = hearer.vocabulary
@@ -15,7 +15,7 @@ def play_language_game(agent):
     hearer_signs = list(hearer_vocab.values())
 
     # get signs of speaker
-    semantic_components = agent.semantic_components()
+    semantic_components = agent.semantic_components
     # select a random sign to communicate
     speaker_semantic_component = random.choice(semantic_components)
     # get the sign the speaker has memorised for that semantic component
@@ -38,7 +38,7 @@ def play_language_game(agent):
             # communicative success
             if speaker_sign != most_similar_hearer_sign:
                 modified_hearer_sign = modify_hearer_sign(speaker_sign, most_similar_hearer_sign)
-                hearer.add_word(hearer_semantic_component, modified_hearer_sign)
+                hearer.add_sign(hearer_semantic_component, modified_hearer_sign)
             # else: recognised and completely the same, do nothing
         # else: communicative failure: not recognised, do nothing
 
