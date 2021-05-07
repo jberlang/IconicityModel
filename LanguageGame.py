@@ -3,17 +3,6 @@ from fuzzywuzzy import fuzz
 
 
 def play_language_game(agent):
-    # get interlocutors
-    interlocutors = agent.get_neighbours()
-    # select a hearer from the interlocutors
-    hearer = random.choice(interlocutors)
-    # get interlocutors' vocabulary
-    hearer_vocab = hearer.vocabulary
-    # get hearer's semantic components
-    hearer_semantic_components = list(hearer_vocab.keys())
-    # get hearers' phonological components
-    hearer_signs = list(hearer_vocab.values())
-
     # get signs of speaker
     semantic_components = agent.semantic_components
     # select a random sign to communicate
@@ -21,13 +10,25 @@ def play_language_game(agent):
     # get the sign the speaker has memorised for that semantic component
     speaker_sign = agent.vocabulary[speaker_semantic_component]
 
-    # calculate how similar the agent's sign is to the phon. comp. of the interlocutor
-    # (package: fuzzywuzzy - Levenshtein's distance; calculating difference of strings)
-    distances = [fuzz.ratio(hearer_sign, speaker_sign) for hearer_sign in hearer_signs]
-    max_similarity = max(distances)
+    # get interlocutors that have acquired signs
+    interlocutors = list(filter(lambda i: i.non_empty_vocab(), agent.get_neighbours()))
+    # if there are neighbours that know signs
+    if len(interlocutors) > 0:
+        # select a hearer from the interlocutors
+        hearer = random.choice(interlocutors)
+        # get interlocutors' vocabulary
+        hearer_vocab = hearer.vocabulary
+        # get hearer's semantic components
+        hearer_semantic_components = list(hearer_vocab.keys())
+        # get hearers' phonological components
+        hearer_signs = list(hearer_vocab.values())
 
-    # check whether the interlocutor recognises the sign (Levenshtein's distance >= 60)
-    if max_similarity >= 60:
+        # calculate how similar the agent's sign is to the phon. comp. of the interlocutor
+        # (package: fuzzywuzzy - Levenshtein's distance; calculating difference of strings)
+        distances = [fuzz.ratio(hearer_sign, speaker_sign) for hearer_sign in hearer_signs]
+        max_similarity = max(distances)
+
+        # check whether the interlocutor recognises the sign (Levenshtein's distance >= 60)
         # interlocutor recognises it
         max_similarity_idx = distances.index(max_similarity)
         most_similar_hearer_sign = hearer_signs[max_similarity_idx]

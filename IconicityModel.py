@@ -52,9 +52,11 @@ class IconicityModel(Model):
         self.l1_avg_iconicity = initial_degree_of_iconicity
         self.l2_avg_iconicity = initial_degree_of_iconicity
         self.total_avg_iconicity = initial_degree_of_iconicity
-        self.datacollector = DataCollector({'l1_avg_iconicity': 'l1_avg_iconicity',
-                                            'l2_avg_iconicity': 'l2_avg_iconicity',
-                                            'total_avg_iconicity': 'total_avg_iconicity',
+        self.average_convergence_ratio = 0
+        self.datacollector = DataCollector({'L1 avg. iconicity': 'l1_avg_iconicity',
+                                            'L2 avg. iconicity': 'l2_avg_iconicity',
+                                            'Total avg. iconicity': 'total_avg_iconicity',
+                                            'Avg. convergence ratio': 'average_convergence_ratio',
                                             'year': 'year'})
 
         # create agents
@@ -131,6 +133,7 @@ class IconicityModel(Model):
         self.l1_avg_iconicity = compute_l1_average_iconicity(self)
         self.l2_avg_iconicity = compute_l2_average_iconicity(self)
         self.total_avg_iconicity = compute_total_average_iconicity(self)
+        self.average_convergence_ratio = compute_average_convergence_ratio(self)
         self.datacollector.collect(self)
 
     def step(self):

@@ -1,3 +1,6 @@
+from itertools import combinations
+from fuzzywuzzy import fuzz
+
 # Data collection
 # This section contains functions that allows us to collect data from both the model and the agents.
 
@@ -38,3 +41,35 @@ def compute_l2_average_iconicity(model):
         return round((sum(l2_iconicity_ratios) / number_of_l2_agents) * 100) / 100
     else:
         return 0
+
+
+def compute_average_convergence_ratio(model):
+    """Computes the convergence ratio for the whole model"""
+    all_agents = list(filter(lambda a: a.non_empty_vocab(), model.schedule.agents))
+
+    # get all pairwise combinations of agents
+    all_agent_combinations = list(combinations(all_agents, 2))
+    # for each of these pairs, calculate their convergence ratio
+    average_convergence_ratios = [average_convergence_ratio(c) for c in all_agent_combinations]
+    number_of_combinations = len(all_agent_combinations)
+
+    if number_of_combinations > 0:
+        return round((sum(average_convergence_ratios) / number_of_combinations) * 100) / 100
+    else:
+        return 0
+
+
+def average_convergence_ratio(combination):
+    convergence_ratios = []
+
+    fst_agent = combination[0]
+    snd_agent = combination[1]
+
+    fst_phonological_components = list(fst_agent.vocabulary.values())
+    snd_phonological_components = list(snd_agent.vocabulary.values())
+
+    for fst_comp, snd_comp in zip(fst_phonological_components, snd_phonological_components):
+        convergence_ratio = fuzz.ratio(fst_comp, snd_comp)
+        convergence_ratios.append(convergence_ratio)
+
+    return sum(convergence_ratios) / len(convergence_ratios)
