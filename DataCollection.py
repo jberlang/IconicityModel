@@ -1,8 +1,8 @@
 from itertools import combinations
-from fuzzywuzzy import fuzz
 
 # Data collection
 # This section contains functions that allows us to collect data from both the model and the agents.
+
 
 def compute_total_average_iconicity(model):
     """Calculates the average iconicity over the whole model"""
@@ -69,7 +69,20 @@ def average_convergence_ratio(combination):
     snd_phonological_components = list(snd_agent.vocabulary.values())
 
     for fst_comp, snd_comp in zip(fst_phonological_components, snd_phonological_components):
-        convergence_ratio = fuzz.ratio(fst_comp, snd_comp)
+        convergence_ratio = calculate_similarity(fst_comp,snd_comp)
         convergence_ratios.append(convergence_ratio)
 
     return sum(convergence_ratios) / len(convergence_ratios)
+
+
+def calculate_similarity(fst_comp, snd_comp):
+    matched_bits = 0
+    fst_bits = [bit for bit in fst_comp]
+    snd_bits = [bit for bit in snd_comp]
+    length = len(fst_bits)
+
+    for idx in range(length):
+        if fst_bits[idx] == snd_bits[idx]:
+            matched_bits += 1
+
+    return (matched_bits / length) * 100

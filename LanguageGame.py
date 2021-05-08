@@ -1,5 +1,4 @@
 import random
-from fuzzywuzzy import fuzz
 
 
 def play_language_game(agent):
@@ -25,7 +24,7 @@ def play_language_game(agent):
 
         # calculate how similar the agent's sign is to the phon. comp. of the interlocutor
         # (package: fuzzywuzzy - Levenshtein's distance; calculating difference of strings)
-        distances = [fuzz.ratio(hearer_sign, speaker_sign) for hearer_sign in hearer_signs]
+        distances = [calculate_similarity(hearer_sign, speaker_sign) for hearer_sign in hearer_signs]
         max_similarity = max(distances)
 
         # check whether the interlocutor recognises the sign (Levenshtein's distance >= 60)
@@ -63,3 +62,16 @@ def modify_hearer_sign(speaker_sign, hearer_sign):
     hearer_bits[idx] = str(1 - original_bit)
 
     return ''.join(hearer_bits)
+
+
+def calculate_similarity(fst_comp, snd_comp):
+    matched_bits = 0
+    fst_bits = [bit for bit in fst_comp]
+    snd_bits = [bit for bit in snd_comp]
+    length = len(fst_bits)
+
+    for idx in range(length):
+        if fst_bits[idx] == snd_bits[idx]:
+            matched_bits += 1
+
+    return (matched_bits / length) * 100
