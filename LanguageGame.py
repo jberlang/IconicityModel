@@ -23,7 +23,6 @@ def play_language_game(agent):
         hearer_signs = list(hearer_vocab.values())
 
         # calculate how similar the agent's sign is to the phon. comp. of the interlocutor
-        # (package: fuzzywuzzy - Levenshtein's distance; calculating difference of strings)
         distances = [calculate_similarity(hearer_sign, speaker_sign) for hearer_sign in hearer_signs]
         max_similarity = max(distances)
 
@@ -65,13 +64,17 @@ def modify_hearer_sign(speaker_sign, hearer_sign):
 
 
 def calculate_similarity(fst_comp, snd_comp):
-    matched_bits = 0
-    fst_bits = [bit for bit in fst_comp]
-    snd_bits = [bit for bit in snd_comp]
-    length = len(fst_bits)
+    if not(fst_comp == "N/A" or snd_comp == "N/A"):
+        matched_bits = 0
+        fst_bits = [bit for bit in fst_comp]
+        snd_bits = [bit for bit in snd_comp]
+        length = len(fst_bits)
 
-    for idx in range(length):
-        if fst_bits[idx] == snd_bits[idx]:
-            matched_bits += 1
+        for idx in range(length):
+            if fst_bits[idx] == snd_bits[idx]:
+                matched_bits += 1
 
-    return (matched_bits / length) * 100
+        return (matched_bits / length) * 100
+
+    else:
+        return 0
